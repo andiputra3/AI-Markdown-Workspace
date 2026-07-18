@@ -19,6 +19,7 @@
                        value="{{ settings.get('ai_api_endpoint', 'http://localhost:11434/v1') }}"
                        placeholder="http://localhost:11434/v1"
                        class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-xs opacity-70 mt-1">For Xiaomi Mimo Plan: https://api.mimo.ai/v1</p>
             </div>
             
             <div>
@@ -58,6 +59,46 @@
                     <input type="number" name="max_tokens" 
                            value="{{ settings.get('ai_max_tokens', '4096') }}"
                            class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <!-- Xiaomi Mimo Plan Toggle -->
+            <div class="border-t border-gray-700 pt-4">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="use_xiaomi_mimo" 
+                           {{ 'checked' if settings.get('use_xiaomi_mimo') == 'true' }}
+                           class="rounded">
+                    <span class="text-sm font-medium">Use Xiaomi Mimo Plan API</span>
+                </label>
+                <p class="text-xs opacity-70 mt-1">When enabled, uses Xiaomi Mimo Plan endpoint and API key</p>
+            </div>
+            
+            <!-- OpenRouter Toggle -->
+            <div class="border-t border-gray-700 pt-4">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="use_openrouter" 
+                           {{ 'checked' if settings.get('use_openrouter') == 'true' }}
+                           class="rounded">
+                    <span class="text-sm font-medium">Use OpenRouter API</span>
+                </label>
+                <p class="text-xs opacity-70 mt-1">When enabled, uses OpenRouter endpoint (https://openrouter.ai/docs)</p>
+                <div id="openrouter-settings" class="mt-3 space-y-3 pl-6" 
+                     x-show="document.querySelector('input[name=use_openrouter]').checked"
+                     x-transition>
+                    <div>
+                        <label class="block text-xs font-medium mb-1">OpenRouter API Key</label>
+                        <input type="password" name="openrouter_api_key" 
+                               value="{{ settings.get('openrouter_api_key', '') }}"
+                               placeholder="sk-or-..."
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1">OpenRouter Model</label>
+                        <input type="text" name="openrouter_model" 
+                               value="{{ settings.get('openrouter_model', 'meta-llama/llama-3-8b-instruct:free') }}"
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs opacity-70 mt-1">Examples: meta-llama/llama-3-8b-instruct:free, openai/gpt-4-turbo</p>
+                    </div>
                 </div>
             </div>
             
@@ -216,14 +257,14 @@
                        class="rounded">
                 <span class="text-sm font-medium">Enable Tool Call (OFF by default)</span>
             </label>
-            <p class="text-xs opacity-70 mt-2">Allow AI to call external tools. Disabled by default for security.</p>
+            <p class="text-xs opacity-70 mt-2">Allow AI to call external tools/functions. Works with OpenRouter, OpenAI, and MCP servers.</p>
             <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
                 Save Tool Call Settings
             </button>
         </form>
     </section>
     
-    <!-- MCP Settings (OFF by default) -->
+    <!-- MCP Settings (OFF by default) - Supports ALL MCP Servers -->
     <section class="bg-gray-800 rounded-lg p-6">
         <h2 class="text-xl font-bold mb-4">🔌 MCP (Model Context Protocol)</h2>
         <form hx-post="/settings/mcp" hx-target="#toast-container" hx-swap="beforeend" class="space-y-4">
@@ -233,13 +274,55 @@
                        class="rounded">
                 <span class="text-sm font-medium">Enable MCP (OFF by default)</span>
             </label>
+            <p class="text-xs opacity-70">Connect to any MCP server for extended AI capabilities (filesystem, database, git, etc.)</p>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">MCP Server Command</label>
+                    <input type="text" name="mcp_server_command" 
+                           value="{{ settings.get('mcp_server_command', '') }}"
+                           placeholder="npx, uvx, or path"
+                           class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs opacity-70 mt-1">e.g., "npx", "uvx", or "/path/to/server"</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Transport</label>
+                    <select name="mcp_transport" class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="stdio" {{ 'selected' if settings.get('mcp_transport') == 'stdio' }}>STDIO</option>
+                        <option value="sse" {{ 'selected' if settings.get('mcp_transport') == 'sse' }}>SSE</option>
+                    </select>
+                </div>
+            </div>
             
             <div>
-                <label class="block text-sm font-medium mb-1">MCP Servers (comma-separated)</label>
-                <input type="text" name="mcp_servers" 
-                       value="{{ settings.get('mcp_servers', '') }}"
-                       placeholder="server1,server2,server3"
+                <label class="block text-sm font-medium mb-1">MCP Server Arguments</label>
+                <input type="text" name="mcp_server_args" 
+                       value="{{ settings.get('mcp_server_args', '') }}"
+                       placeholder='[\"/workspace\"] or --config mcp.json'
                        class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-xs opacity-70 mt-1">JSON array for stdio, or arguments string. Examples:<br>
+                • Filesystem: <code class="bg-gray-900 px-2 py-1 rounded">[\"/workspace\"]</code><br>
+                • Git: <code class="bg-gray-900 px-2 py-1 rounded">[\"/workspace\"]</code><br>
+                • Database: <code class="bg-gray-900 px-2 py-1 rounded">[\"sqlite:///data.db\"]</code></p>
+            </div>
+            
+            <div x-show="document.querySelector('select[name=mcp_transport]').value === 'sse'">
+                <label class="block text-sm font-medium mb-1">SSE Endpoint</label>
+                <input type="text" name="mcp_sse_endpoint" 
+                       value="{{ settings.get('mcp_sse_endpoint', '') }}"
+                       placeholder="http://localhost:8080/sse"
+                       class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="border-t border-gray-700 pt-4">
+                <h3 class="text-sm font-medium mb-2">Popular MCP Servers:</h3>
+                <div class="text-xs space-y-1 opacity-80">
+                    <div>• Filesystem: <code class="bg-gray-900 px-2 py-0.5 rounded">npx -y @modelcontextprotocol/server-filesystem /path</code></div>
+                    <div>• Git: <code class="bg-gray-900 px-2 py-0.5 rounded">npx -y @modelcontextprotocol/server-git /path</code></div>
+                    <div>• Database: <code class="bg-gray-900 px-2 py-0.5 rounded">npx -y @modelcontextprotocol/server-sqlite</code></div>
+                    <div>• Memory: <code class="bg-gray-900 px-2 py-0.5 rounded">npx -y @modelcontextprotocol/server-memory</code></div>
+                    <div>• Brave Search: <code class="bg-gray-900 px-2 py-0.5 rounded">npx -y @modelcontextprotocol/server-brave-search</code></div>
+                </div>
             </div>
             
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
