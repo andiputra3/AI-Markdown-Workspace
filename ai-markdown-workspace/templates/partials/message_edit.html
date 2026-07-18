@@ -1,0 +1,32 @@
+<!-- Message Edit Partial (returned by /chat/message/{id}/edit) -->
+<div class="flex justify-end mb-4" id="msg-{{ msg.id }}">
+    <div class="max-w-[85%] md:max-w-[75%] bg-blue-600 rounded-2xl p-4 shadow-lg">
+        <textarea id="edit-{{ msg.id }}" 
+                  name="content"
+                  rows="5"
+                  class="w-full bg-gray-900/50 border border-white/30 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-white text-white whitespace-pre-wrap"
+                  hx-on:keydown-enter.prevent="if(event.ctrlKey) this.closest('form').requestSubmit()"
+        >{{ msg.content }}</textarea>
+        
+        <div class="flex gap-2 mt-3 justify-end">
+            <button hx-post="/chat/message/{{ msg.id }}/save"
+                    hx-vals='{"content": document.getElementById("edit-{{ msg.id }}").value}'
+                    hx-target="#msg-{{ msg.id }}"
+                    hx-swap="outerHTML"
+                    class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Save & Regenerate
+            </button>
+            <button hx-get="/chat/message/{{ msg.id }}/view"
+                    hx-target="#msg-{{ msg.id }}"
+                    hx-swap="outerHTML"
+                    class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                Cancel
+            </button>
+        </div>
+        
+        <p class="text-xs opacity-50 mt-2">Press Ctrl+Enter to save</p>
+    </div>
+</div>

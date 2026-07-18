@@ -1,0 +1,312 @@
+<!-- Settings Page - Phase 4 -->
+{% extends "base.html" %}
+
+{% block title %}Settings - AI Markdown Workspace{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto p-6 space-y-8 overflow-y-auto" style="height: calc(100vh - 80px);">
+    <h1 class="text-2xl font-bold mb-6">⚙️ Settings</h1>
+    
+    <!-- AI Settings -->
+    <section class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+            🤖 AI Settings
+        </h2>
+        <form hx-post="/settings/ai" hx-target="#toast-container" hx-swap="beforeend" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">API Endpoint</label>
+                <input type="text" name="api_endpoint" 
+                       value="{{ settings.get('ai_api_endpoint', 'http://localhost:11434/v1') }}"
+                       placeholder="http://localhost:11434/v1"
+                       class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">API Key (optional)</label>
+                <input type="password" name="api_key" 
+                       value="{{ settings.get('ai_api_key', '') }}"
+                       placeholder="sk-..."
+                       class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Default Model</label>
+                    <input type="text" name="default_model" 
+                           value="{{ settings.get('ai_default_model', 'mimo-v2.5') }}"
+                           class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Thinking Mode</label>
+                    <select name="thinking_mode" class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="off" {{ 'selected' if settings.get('ai_thinking_mode') == 'off' }}>OFF</option>
+                        <option value="low" {{ 'selected' if settings.get('ai_thinking_mode') == 'low' }}>Low</option>
+                        <option value="high" {{ 'selected' if settings.get('ai_thinking_mode') == 'high' }}>High</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Temperature</label>
+                    <input type="number" step="0.1" min="0" max="2" name="temperature" 
+                           value="{{ settings.get('ai_temperature', '0.7') }}"
+                           class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Max Tokens</label>
+                    <input type="number" name="max_tokens" 
+                           value="{{ settings.get('ai_max_tokens', '4096') }}"
+                           class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">Language</label>
+                <select name="language" class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="en" {{ 'selected' if settings.get('ai_language') == 'en' }}>English</option>
+                    <option value="id" {{ 'selected' if settings.get('ai_language') == 'id' }}>Bahasa Indonesia</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
+                Save AI Settings
+            </button>
+        </form>
+    </section>
+    
+    <!-- Markdown Settings -->
+    <section class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">📝 Markdown Settings</h2>
+        <form hx-post="/settings/markdown" hx-target="#toast-container" hx-swap="beforeend" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Theme</label>
+                <select name="markdown_theme" class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="github-dark" {{ 'selected' if settings.get('markdown_theme') == 'github-dark' }}>GitHub Dark</option>
+                    <option value="github-light" {{ 'selected' if settings.get('markdown_theme') == 'github-light' }}>GitHub Light</option>
+                    <option value="obsidian" {{ 'selected' if settings.get('markdown_theme') == 'obsidian' }}>Obsidian</option>
+                </select>
+            </div>
+            
+            <div class="space-y-2">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="syntax_highlight" 
+                           {{ 'checked' if settings.get('syntax_highlight') == 'true' }}
+                           class="rounded">
+                    <span class="text-sm">Enable Syntax Highlighting</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="code_block_copy" 
+                           {{ 'checked' if settings.get('code_block_copy') == 'true' }}
+                           class="rounded">
+                    <span class="text-sm">Show Copy Button on Code Blocks</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="mathjax_enabled" 
+                           {{ 'checked' if settings.get('mathjax_enabled') == 'true' }}
+                           class="rounded">
+                    <span class="text-sm">Enable MathJax (LaTeX)</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="mermaid_enabled" 
+                           {{ 'checked' if settings.get('mermaid_enabled') == 'true' }}
+                           class="rounded">
+                    <span class="text-sm">Enable Mermaid Diagrams</span>
+                </label>
+            </div>
+            
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
+                Save Markdown Settings
+            </button>
+        </form>
+    </section>
+    
+    <!-- RAG Settings -->
+    <section class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">🔍 RAG Settings (Workspace-level)</h2>
+        <form hx-post="/settings/rag" hx-target="#toast-container" hx-swap="beforeend" class="space-y-4">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="rag_enabled" 
+                       {{ 'checked' if settings.get('rag_enabled') == 'true' }}
+                       class="rounded">
+                <span class="text-sm font-medium">Enable RAG (Retrieval Augmented Generation)</span>
+            </label>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Chunk Size</label>
+                    <input type="number" name="chunk_size" 
+                           value="{{ settings.get('chunk_size', '512') }}"
+                           class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Chunk Overlap</label>
+                    <input type="number" name="chunk_overlap" 
+                           value="{{ settings.get('chunk_overlap', '50') }}"
+                           class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">Embedding Model</label>
+                <input type="text" name="embedding_model" 
+                       value="{{ settings.get('embedding_model', 'all-MiniLM-L6-v2') }}"
+                       class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">Similarity Threshold</label>
+                <input type="number" step="0.1" min="0" max="1" name="similarity_threshold" 
+                       value="{{ settings.get('similarity_threshold', '0.7') }}"
+                       class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
+                Save RAG Settings
+            </button>
+        </form>
+    </section>
+    
+    <!-- Token Usage Settings -->
+    <section class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">💰 Token Usage Tracking</h2>
+        <form hx-post="/settings/token" hx-target="#toast-container" hx-swap="beforeend" class="space-y-4">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="track_usage" 
+                       {{ 'checked' if settings.get('track_usage') == 'true' }}
+                       class="rounded">
+                <span class="text-sm font-medium">Track Token Usage</span>
+            </label>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Cost per 1K Prompt Tokens ($)</label>
+                    <input type="number" step="0.0001" min="0" name="cost_per_1k_prompt" 
+                           value="{{ settings.get('cost_per_1k_prompt', '0.0') }}"
+                           class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Cost per 1K Completion Tokens ($)</label>
+                    <input type="number" step="0.0001" min="0" name="cost_per_1k_completion" 
+                           value="{{ settings.get('cost_per_1k_completion', '0.0') }}"
+                           class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">Monthly Budget Limit ($)</label>
+                <input type="number" step="0.01" min="0" name="budget_limit" 
+                       value="{{ settings.get('budget_limit', '0.0') }}"
+                       class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
+                Save Token Settings
+            </button>
+        </form>
+    </section>
+    
+    <!-- Tool Call Settings (OFF by default) -->
+    <section class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">🛠️ Tool Call (Experimental)</h2>
+        <form hx-post="/settings/toolcall" hx-target="#toast-container" hx-swap="beforeend">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="tool_call_enabled" 
+                       {{ 'checked' if settings.get('tool_call_enabled') == 'true' }}
+                       class="rounded">
+                <span class="text-sm font-medium">Enable Tool Call (OFF by default)</span>
+            </label>
+            <p class="text-xs opacity-70 mt-2">Allow AI to call external tools. Disabled by default for security.</p>
+            <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
+                Save Tool Call Settings
+            </button>
+        </form>
+    </section>
+    
+    <!-- MCP Settings (OFF by default) -->
+    <section class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">🔌 MCP (Model Context Protocol)</h2>
+        <form hx-post="/settings/mcp" hx-target="#toast-container" hx-swap="beforeend" class="space-y-4">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="mcp_enabled" 
+                       {{ 'checked' if settings.get('mcp_enabled') == 'true' }}
+                       class="rounded">
+                <span class="text-sm font-medium">Enable MCP (OFF by default)</span>
+            </label>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">MCP Servers (comma-separated)</label>
+                <input type="text" name="mcp_servers" 
+                       value="{{ settings.get('mcp_servers', '') }}"
+                       placeholder="server1,server2,server3"
+                       class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
+                Save MCP Settings
+            </button>
+        </form>
+    </section>
+    
+    <!-- Export Settings -->
+    <section class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">📤 Export Settings</h2>
+        <form hx-post="/settings/export" hx-target="#toast-container" hx-swap="beforeend" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Default Export Format</label>
+                <select name="export_format" class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="markdown" {{ 'selected' if settings.get('export_format') == 'markdown' }}>Markdown (.md)</option>
+                    <option value="json" {{ 'selected' if settings.get('export_format') == 'json' }}>JSON (.json)</option>
+                    <option value="html" {{ 'selected' if settings.get('export_format') == 'html' }}>HTML (.html)</option>
+                </select>
+            </div>
+            
+            <div class="space-y-2">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="include_timestamps" 
+                           {{ 'checked' if settings.get('include_timestamps') == 'true' }}
+                           class="rounded">
+                    <span class="text-sm">Include Timestamps (WIB)</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="include_metadata" 
+                           {{ 'checked' if settings.get('include_metadata') == 'true' }}
+                           class="rounded">
+                    <span class="text-sm">Include Metadata (model, tokens)</span>
+                </label>
+            </div>
+            
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
+                Save Export Settings
+            </button>
+        </form>
+    </section>
+    
+    <!-- Theme Settings -->
+    <section class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">🎨 UI Theme</h2>
+        <form hx-post="/settings/theme" hx-target="#toast-container" hx-swap="beforeend" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Theme</label>
+                <select name="theme" class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="dark" {{ 'selected' if settings.get('ui_theme') == 'dark' }}>Dark</option>
+                    <option value="light" {{ 'selected' if settings.get('ui_theme') == 'light' }}>Light</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">Font Size</label>
+                <select name="font_size" class="w-full bg-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="sm" {{ 'selected' if settings.get('ui_font_size') == 'sm' }}>Small</option>
+                    <option value="base" {{ 'selected' if settings.get('ui_font_size') == 'base' }}>Medium</option>
+                    <option value="lg" {{ 'selected' if settings.get('ui_font_size') == 'lg' }}>Large</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium">
+                Save Theme Settings
+            </button>
+        </form>
+    </section>
+</div>
+{% endblock %}

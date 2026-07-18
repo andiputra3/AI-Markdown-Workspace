@@ -1,0 +1,52 @@
+<!-- Chat Page Template -->
+{% extends "base.html" %}
+
+{% block title %}Chat - AI Markdown Workspace{% endblock %}
+
+{% block content %}
+<div class="flex flex-col h-full max-w-5xl mx-auto">
+    <!-- Messages Container -->
+    <div id="messages-list" 
+         class="flex-1 overflow-y-auto space-y-4 mb-4"
+         hx-ext="sse"
+         sse-connect="/chat/stream?session_id={{ session_id }}"
+         sse-swap="message"
+         hx-target="#streaming-response"
+         hx-swap="innerHTML">
+        
+        {% for msg in messages %}
+            {% if msg.role == 'user' %}
+                {% include 'components/chat_message_user.html' %}
+            {% elif msg.role == 'assistant' %}
+                {% include 'components/chat_message_ai.html' %}
+            {% endif %}
+        {% endfor %}
+        
+        <!-- Streaming response placeholder -->
+        <div id="streaming-response"></div>
+    </div>
+    
+    <!-- Prompt Input -->
+    {% include 'components/prompt_input.html' %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Auto-scroll to bottom on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        scrollToBottom();
+    });
+    
+    // Handle SSE messages
+    document.body.addEventListener('htmx:sseMessage', (event) => {
+        const data = event.detail.data;
+        const streamingDiv = document.getElementById('streaming-response');
+        
+        if (streamingDiv) {
+            streamingDiv.innerHTML += data.chunk || '';
+            scrollToBottom();
+        }
+    });
+</script>
+{% endblock %}

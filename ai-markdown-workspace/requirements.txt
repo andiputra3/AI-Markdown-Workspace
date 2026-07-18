@@ -1,0 +1,28 @@
+# Core Framework
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+
+# Database
+aiosqlite>=0.19.0
+
+# HTTP Client
+httpx>=0.26.0
+
+# Templates & Rendering
+jinja2>=3.1.3
+markdown>=3.5.2
+pygments>=2.17.2
+
+# Settings Management
+pydantic>=2.5.3
+pydantic-settings>=2.1.0
+
+# Timezone
+python-dateutil>=2.8.2
+
+# Optional: RAG support (Phase 5)
+# chromadb>=0.4.22
+# sentence-transformers>=2.3.1
+
+# Development
+python-dotenv>=1.0.0

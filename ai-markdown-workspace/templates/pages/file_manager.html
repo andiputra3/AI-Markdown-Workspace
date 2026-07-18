@@ -1,0 +1,125 @@
+<!-- File Manager Page - Phase 3 -->
+{% extends "base.html" %}
+
+{% block title %}File Manager - AI Markdown Workspace{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row h-full" 
+     x-data="{ selectedFile: null, showHistory: false }">
+    
+    <!-- File tree panel -->
+    <div class="md:w-1/3 border-r border-gray-700 overflow-y-auto p-4 bg-gray-800">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold">📁 {{ workspace.name }}</h2>
+            <button hx-get="/files/refresh" 
+                    hx-target="#file-tree"
+                    hx-trigger="refreshFiles from:body"
+                    class="p-2 hover:bg-gray-700 rounded">🔄</button>
+        </div>
+        
+        <div id="file-tree" class="space-y-1">
+            {% for item in files %}
+                {% if item.is_dir %}
+                    <div class="flex items-center gap-2 p-2 hover:bg-gray-700 rounded cursor-pointer">
+                        <span>📂</span>
+                        <span class="flex-1">{{ item.name }}</span>
+                    </div>
+                {% else %}
+                    <div class="flex items-center gap-2 p-2 hover:bg-gray-700 rounded cursor-pointer"
+                         @click="selectedFile = '{{ item.path }}'; showHistory = true"
+                         hx-get="/files/{{ item.path }}/preview"
+                         hx-target="#file-preview"
+                         hx-swap="innerHTML">
+                        <span>📄</span>
+                        <span class="flex-1 truncate">{{ item.name }}</span>
+                        <span class="text-xs opacity-50">{{ (item.size / 1024)|round(1) }}KB</span>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            
+            {% if not files %}
+                <p class="opacity-50 text-sm italic">No files yet. Create one!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Create buttons -->
+        <div class="mt-4 flex flex-wrap gap-2">
+            <button hx-post="/files/create"
+                    hx-target="#file-tree"
+                    hx-swap="outerHTML"
+                    class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">
+                + New File
+            </button>
+            <button hx-post="/files/folder"
+                    hx-target="#file-tree"
+                    class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm">
+                + Folder
+            </button>
+        </div>
+    </div>
+    
+    <!-- File preview + History panel -->
+    <div class="md:w-2/3 flex flex-col">
+        <!-- Preview area -->
+        <div id="file-preview" class="flex-1 overflow-auto p-4 bg-gray-900">
+            <div class="flex items-center justify-center h-full text-gray-500">
+                <div class="text-center">
+                    <div class="text-4xl mb-2">📄</div>
+                    <p>Select a file to preview</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- File History Panel (NEW - Audit Feature) -->
+        <div id="file-history-panel" 
+             x-show="showHistory && selectedFile"
+             x-transition
+             class="border-t border-gray-700 bg-gray-800 max-h-64 overflow-y-auto p-4">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold">📋 File History: <span x-text="selectedFile"></span></h3>
+                <button @click="showHistory = false" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <div hx-get="/files/{selectedFile}/history"
+                 hx-trigger="load, refreshFiles from:body"
+                 hx-target="this"
+                 class="space-y-2">
+                <!-- Loaded via HTMX -->
+                <p class="opacity-50 text-sm">Loading history...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for creating new file -->
+<div id="create-file-modal" 
+     class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+     x-data="{ open: false }"
+     @open-create-modal.window="open = true"
+     @close-create-modal.window="open = false">
+    <div x-show="open" 
+         @click.away="open = false"
+         class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold mb-4">Create New File</h3>
+        <form hx-post="/files/create"
+              hx-target="#file-tree"
+              @submit="open = false">
+            <input type="text" name="path" placeholder="filename.md" required
+                   class="w-full bg-gray-700 rounded px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <textarea name="content" placeholder="File content..." rows="6"
+                      class="w-full bg-gray-700 rounded px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            <div class="flex gap-2 justify-end">
+                <button type="button" @click="open = false"
+                        class="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Helper to open create modal
+function openCreateModal() {
+    htmx.trigger(document.body, 'open-create-modal');
+}
+</script>
+{% endblock %}

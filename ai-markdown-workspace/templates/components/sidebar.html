@@ -1,0 +1,64 @@
+<!-- Sidebar Navigation Component -->
+<nav class="flex flex-col h-full p-4 space-y-2">
+    <!-- App Logo/Title -->
+    <div class="mb-6 px-3">
+        <h1 class="text-xl font-bold text-white">🤖 AI Workspace</h1>
+        <p class="text-xs text-gray-400 mt-1">HTMX Edition</p>
+    </div>
+    
+    <!-- Navigation Links -->
+    <a href="/chat" 
+       hx-get="/chat" 
+       hx-target="#main-content" 
+       hx-push-url="true"
+       class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-700 transition-colors {{ 'bg-gray-700' if active_page == 'chat' else '' }}">
+        <span class="text-xl">💬</span>
+        <span class="font-medium">Chat</span>
+    </a>
+    
+    <a href="/files" 
+       hx-get="/files" 
+       hx-target="#main-content" 
+       hx-push-url="true"
+       class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-700 transition-colors {{ 'bg-gray-700' if active_page == 'files' else '' }}">
+        <span class="text-xl">📁</span>
+        <span class="font-medium">File Manager</span>
+    </a>
+    
+    <a href="/sqlite" 
+       hx-get="/sqlite" 
+       hx-target="#main-content" 
+       hx-push-url="true"
+       class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-700 transition-colors {{ 'bg-gray-700' if active_page == 'sqlite' else '' }}">
+        <span class="text-xl">🗄️</span>
+        <span class="font-medium">SQLite Viewer</span>
+    </a>
+    
+    <a href="/audit" 
+       hx-get="/audit" 
+       hx-target="#main-content" 
+       hx-push-url="true"
+       class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-700 transition-colors {{ 'bg-gray-700' if active_page == 'audit' else '' }}">
+        <span class="text-xl">🔍</span>
+        <span class="font-medium">Audit Log</span>
+    </a>
+    
+    <a href="/settings" 
+       hx-get="/settings" 
+       hx-target="#main-content" 
+       hx-push-url="true"
+       class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-700 transition-colors {{ 'bg-gray-700' if active_page == 'settings' else '' }}">
+        <span class="text-xl">⚙️</span>
+        <span class="font-medium">Settings</span>
+    </a>
+    
+    <!-- Spacer -->
+    <div class="flex-1"></div>
+    
+    <!-- Footer Info -->
+    <div class="mt-auto pt-4 border-t border-gray-700 px-3">
+        <p class="text-xs text-gray-500">
+            v1.0.0 • WIB Timezone
+        </p>
+    </div>
+</nav>
