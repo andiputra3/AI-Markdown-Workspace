@@ -1,0 +1,10 @@
+Beri Izin Eksekusi
+Jalankan perintah ini agar script bisa dijalankan:
+bash
+chmod +x /workspace/ai-markdown-workspace/install.sh
+chmod +x /workspace/ai-markdown-workspace/start.sh
+5. Cara Menggunakan
+Sekarang Anda bisa menjalankan:
+Instalasi: ./install.sh
+Start: ./start.sh
+File-file ini sekarang sudah ada di root folder dan siap digunakan!
