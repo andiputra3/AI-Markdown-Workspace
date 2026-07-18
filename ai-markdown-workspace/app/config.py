@@ -26,6 +26,18 @@ class Settings(BaseSettings):
     AI_MAX_TOKENS: int = 4096
     AI_THINKING_MODE: str = "off"  # off, low, high
     
+    # Xiaomi Mimo Plan API (specific support)
+    XIAOMI_MIMO_API_ENDPOINT: str = "https://api.mimo.ai/v1"
+    XIAOMI_MIMO_API_KEY: Optional[str] = None
+    XIAOMI_MIMO_MODEL: str = "mimo-v2.5"
+    
+    # OpenRouter API Support (https://openrouter.ai/docs)
+    OPENROUTER_API_ENDPOINT: str = "https://openrouter.ai/api/v1"
+    OPENROUTER_API_KEY: Optional[str] = None
+    OPENROUTER_SITE_URL: str = "http://localhost:8000"
+    OPENROUTER_SITE_NAME: str = "AI Markdown Workspace"
+    OPENROUTER_MODEL: str = "meta-llama/llama-3-8b-instruct:free"
+    
     # Timezone (fixed to WIB)
     TIMEZONE: str = "Asia/Jakarta"
     
@@ -51,6 +63,12 @@ class Settings(BaseSettings):
     # Tool Call & MCP (OFF by default)
     TOOL_CALL_ENABLED: bool = False
     MCP_ENABLED: bool = False
+    
+    # MCP Server Configuration (for all MCP servers)
+    MCP_SERVER_COMMAND: str = ""  # e.g., "npx", "uvx", or path to MCP server
+    MCP_SERVER_ARGS: str = ""     # JSON string of arguments, e.g., '["--config", "mcp.json"]'
+    MCP_TRANSPORT: str = "stdio"  # stdio or sse
+    MCP_SSE_ENDPOINT: str = ""    # Endpoint for SSE transport
     
     # Export
     EXPORT_INCLUDE_TIMESTAMPS: bool = True

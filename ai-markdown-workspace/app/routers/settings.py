@@ -40,9 +40,10 @@ async def save_ai_settings(
     max_tokens: int = Form(4096),
     thinking_mode: str = Form("off"),
     language: str = Form("en"),
+    use_xiaomi_mimo: bool = Form(False),
     db: Session = Depends(get_db)
 ):
-    """Save AI settings"""
+    """Save AI settings including Xiaomi Mimo Plan support"""
     now = utc_now().isoformat()
     
     settings_to_save = {
@@ -52,7 +53,8 @@ async def save_ai_settings(
         "ai_temperature": str(temperature),
         "ai_max_tokens": str(max_tokens),
         "ai_thinking_mode": thinking_mode,
-        "ai_language": language
+        "ai_language": language,
+        "use_xiaomi_mimo": "true" if use_xiaomi_mimo else "false"
     }
     
     for key, value in settings_to_save.items():
