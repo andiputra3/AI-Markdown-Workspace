@@ -1,0 +1,112 @@
+<!-- Prompt Input Component with Slash Autocomplete -->
+<div class="border-t border-gray-700 bg-gray-800 p-4">
+    <form hx-post="/chat/send"
+          hx-target="#messages-list"
+          hx-swap="beforeend"
+          hx-on::after-request="this.reset(); setTimeout(scrollToBottom, 100)"
+          class="max-w-5xl mx-auto">
+        
+        <!-- Hidden session ID -->
+        <input type="hidden" name="session_id" value="{{ session_id }}">
+        
+        <!-- Textarea with Alpine.js for autocomplete -->
+        <div x-data="{ 
+                suggestions: [], 
+                showSuggestions: false,
+                selectedIndex: -1,
+                fetchSuggestions(value) {
+                    if (value.startsWith('/')) {
+                        const query = value.slice(1);
+                        fetch(`/builders/search?q=${encodeURIComponent(query)}`)
+                            .then(r => r.json())
+                            .then(data => {
+                                this.suggestions = data;
+                                this.showSuggestions = data.length > 0;
+                                this.selectedIndex = -1;
+                            });
+                    } else {
+                        this.showSuggestions = false;
+                        this.suggestions = [];
+                    }
+                },
+                selectSuggestion(s) {
+                    const textarea = document.getElementById('prompt-input');
+                    textarea.value = s.command + ' ';
+                    this.showSuggestions = false;
+                    this.suggestions = [];
+                    textarea.focus();
+                }
+            }"
+            class="relative">
+            
+            <textarea id="prompt-input"
+                      name="content"
+                      rows="3"
+                      placeholder="Ask anything... (type / for builders)"
+                      @input.debounce.200ms="fetchSuggestions($el.value)"
+                      @keydown.enter.exact.prevent="$el.form.requestSubmit()"
+                      @keydown.arrow-down.prevent="if (showSuggestions && selectedIndex < suggestions.length - 1) selectedIndex++"
+                      @keydown.arrow-up.prevent="if (showSuggestions && selectedIndex > 0) selectedIndex--"
+                      @keydown.enter.prevent="if (showSuggestions && selectedIndex >= 0) { selectSuggestion(suggestions[selectedIndex]); $event.preventDefault(); }"
+                      @keydown.escape="showSuggestions = false; suggestions = [];"
+                      class="w-full bg-gray-700 rounded-lg p-3 pr-12 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"></textarea>
+            
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="absolute right-2 bottom-2 p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+            </button>
+            
+            <!-- Slash Command Suggestions Dropdown -->
+            <div x-show="showSuggestions" 
+                 x-cloak
+                 class="absolute bottom-full left-0 right-0 mb-2 bg-gray-700 rounded-lg shadow-xl overflow-hidden border border-gray-600 z-50">
+                <template x-for="(s, index) in suggestions">
+                    <div @click="selectSuggestion(s)"
+                         :class="index === selectedIndex ? 'bg-gray-600' : 'hover:bg-gray-600'"
+                         class="p-3 cursor-pointer transition-colors">
+                        <span class="font-mono text-blue-400" x-text="s.command"></span>
+                        <span class="ml-2 text-sm opacity-70" x-text="s.description"></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+        
+        <!-- Bottom Controls -->
+        <div class="flex flex-wrap gap-4 mt-3 text-sm">
+            <!-- Thinking Mode -->
+            <label class="flex items-center gap-2 text-gray-300">
+                <span>🧠 Thinking:</span>
+                <select name="thinking" class="bg-gray-700 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <option value="off">OFF</option>
+                    <option value="low">Low</option>
+                    <option value="high">High</option>
+                </select>
+            </label>
+            
+            <!-- Model Selection -->
+            <label class="flex items-center gap-2 text-gray-300">
+                <span>🤖 Model:</span>
+                <select name="model" class="bg-gray-700 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <option value="mimo-v2.5">mimo-v2.5</option>
+                    <option value="llama-3.1">Llama 3.1</option>
+                    <option value="qwen-2.5">Qwen 2.5</option>
+                </select>
+            </label>
+            
+            <!-- Generate File Toggle -->
+            <label class="flex items-center gap-2 text-gray-300 cursor-pointer">
+                <input type="checkbox" name="generate_file" class="rounded border-gray-600 text-blue-600 focus:ring-blue-500">
+                <span>📁 Auto Generate</span>
+            </label>
+            
+            <!-- Auto Save Toggle -->
+            <label class="flex items-center gap-2 text-gray-300 cursor-pointer">
+                <input type="checkbox" name="auto_save" checked class="rounded border-gray-600 text-blue-600 focus:ring-blue-500">
+                <span>💾 Auto Save</span>
+            </label>
+        </div>
+    </form>
+</div>

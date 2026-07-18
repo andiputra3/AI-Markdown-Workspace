@@ -1,0 +1,96 @@
+<!-- Topbar Component -->
+<header class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between">
+    <!-- Left: Workspace Selector -->
+    <div class="flex items-center gap-4">
+        <h2 class="text-lg font-semibold hidden md:block">{{ page_title | default('AI Markdown Workspace') }}</h2>
+        
+        <!-- Workspace Dropdown -->
+        <div x-data="{ open: false }" class="relative">
+            <button @click="open = !open" 
+                    class="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg text-sm transition-colors">
+                <span>📂</span>
+                <span>{{ current_workspace_name | default('Select Workspace') }}</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div x-show="open" 
+                 @click.away="open = false"
+                 x-transition:enter="transition ease-out duration-100"
+                 x-transition:enter-start="transform opacity-0 scale-95"
+                 x-transition:enter-end="transform opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-75"
+                 x-transition:leave-start="transform opacity-100 scale-100"
+                 x-transition:leave-end="transform opacity-0 scale-95"
+                 class="absolute left-0 mt-2 w-56 bg-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                <div class="py-1 max-h-64 overflow-y-auto">
+                    {% for ws in workspaces %}
+                    <a href="/workspaces/switch/{{ ws.id }}"
+                       hx-get="/workspaces/switch/{{ ws.id }}"
+                       hx-target="#main-content"
+                       hx-push-url="true"
+                       class="block px-4 py-2 text-sm hover:bg-gray-600 {{ 'bg-gray-600' if current_workspace_id == ws.id else '' }}">
+                        {{ ws.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                <div class="border-t border-gray-600 px-4 py-2">
+                    <button hx-post="/workspaces/create"
+                            hx-target="#main-content"
+                            class="text-sm text-blue-400 hover:text-blue-300 w-full text-left">
+                        + New Workspace
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right: Global Actions -->
+    <div class="flex items-center gap-2">
+        <!-- Copy All Chat (only on chat page) -->
+        {% if active_page == 'chat' %}
+        <button hx-post="/chat/copy-all"
+                hx-target="#toast-container"
+                hx-swap="beforeend"
+                class="hidden md:flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg text-sm transition-colors"
+                title="Copy entire chat">
+            <span>📋</span>
+            <span>Copy All</span>
+        </button>
+        
+        <!-- Export Chat -->
+        <div x-data="{ open: false }" class="relative hidden md:block">
+            <button @click="open = !open"
+                    class="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg text-sm transition-colors">
+                <span>📥</span>
+                <span>Export</span>
+            </button>
+            
+            <div x-show="open" 
+                 @click.away="open = false"
+                 class="absolute right-0 mt-2 w-40 bg-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                <a href="/export/chat/markdown?session_id={{ current_session_id }}"
+                   class="block px-4 py-2 text-sm hover:bg-gray-600">
+                    📄 Export as .md
+                </a>
+                <a href="/export/chat/json?session_id={{ current_session_id }}"
+                   class="block px-4 py-2 text-sm hover:bg-gray-600">
+                    📊 Export as .json
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- New Chat (on chat page) -->
+        {% if active_page == 'chat' %}
+        <button hx-get="/chat/new"
+                hx-target="#main-content"
+                class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg text-sm transition-colors">
+            <span>➕</span>
+            <span class="hidden md:inline">New Chat</span>
+        </button>
+        {% endif %}
+    </div>
+</header>

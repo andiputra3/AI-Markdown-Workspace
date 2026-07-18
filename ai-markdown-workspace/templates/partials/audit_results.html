@@ -1,0 +1,94 @@
+<!-- Audit Results Partial -->
+<div class="bg-gray-800 rounded-lg p-4 md:p-6 border border-gray-700">
+    {% if error %}
+        <div class="text-red-400 text-center py-4">{{ error }}</div>
+    {% elif not history %}
+        <div class="text-gray-400 text-center py-4">No file operations found for "{{ file_path }}".</div>
+    {% else %}
+        <!-- File Header -->
+        <h3 class="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            {{ file_path }}
+        </h3>
+        
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gray-700/50 rounded-lg p-3">
+                <div class="text-xs text-gray-400 mb-1">Created</div>
+                <div class="font-mono text-sm text-gray-100">{{ first_created | from_iso | wib }}</div>
+            </div>
+            <div class="bg-gray-700/50 rounded-lg p-3">
+                <div class="text-xs text-gray-400 mb-1">Total Operations</div>
+                <div class="text-2xl font-bold text-blue-400">{{ total_ops }}</div>
+            </div>
+            <div class="bg-gray-700/50 rounded-lg p-3">
+                <div class="text-xs text-gray-400 mb-1">Edits</div>
+                <div class="text-2xl font-bold text-green-400">{{ edit_count }}</div>
+            </div>
+            <div class="bg-gray-700/50 rounded-lg p-3">
+                <div class="text-xs text-gray-400 mb-1">Current Size</div>
+                <div class="font-mono text-sm text-gray-100">{{ current_size }} bytes</div>
+            </div>
+        </div>
+        
+        <!-- Timeline -->
+        <h4 class="font-bold text-gray-100 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Timeline
+        </h4>
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+            {% for entry in history %}
+            <div class="flex gap-3 p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors">
+                <!-- Timestamp -->
+                <div class="text-xs text-gray-400 whitespace-nowrap pt-1">
+                    {{ entry.created_at | from_iso | wib }}
+                </div>
+                
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 rounded text-xs font-bold
+                            {% if entry.action == 'create' %} bg-green-600/30 text-green-400
+                            {% elif entry.action == 'edit' %} bg-blue-600/30 text-blue-400
+                            {% elif entry.action == 'delete' %} bg-red-600/30 text-red-400
+                            {% elif entry.action == 'rename' %} bg-purple-600/30 text-purple-400
+                            {% elif entry.action == 'move' %} bg-yellow-600/30 text-yellow-400
+                            {% else %} bg-gray-600/30 text-gray-400
+                            {% endif %}">
+                            {{ entry.action | upper }}
+                        </span>
+                        <span class="text-xs text-gray-400">by {{ entry.source_type }}</span>
+                    </div>
+                    
+                    {% if entry.source_description %}
+                        <div class="text-sm text-gray-300 mt-1">{{ entry.source_description }}</div>
+                    {% endif %}
+                    
+                    {% if entry.previous_path %}
+                        <div class="text-xs text-gray-400 mt-1">
+                            <span class="font-mono">{{ entry.previous_path }}</span> → 
+                            <span class="font-mono text-blue-400">{{ entry.file_path }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    {% if entry.diff_summary %}
+                        <div class="text-xs mt-2 flex items-center gap-3">
+                            <span class="text-green-400">+{{ entry.diff_summary.added }} lines</span>
+                            <span class="text-red-400">-{{ entry.diff_summary.removed }} lines</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Size -->
+                <div class="text-xs text-gray-400 whitespace-nowrap pt-1">
+                    {{ entry.file_size_bytes }} B
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
